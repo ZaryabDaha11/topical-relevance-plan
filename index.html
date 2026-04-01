@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Topical Relevance Plan</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+  </head>
+  <body>
+    <div class="container">
+      <!-- HEADER -->
+      <div class="header">
+        <svg
+          class="header-logo"
+          viewBox="0 0 48 48"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <rect
+            width="48"
+            height="48"
+            rx="10"
+            fill="rgba(74,222,128,0.08)"
+            stroke="rgba(74,222,128,0.25)"
+            stroke-width="1"
+          />
+          <path
+            d="M10 38 L10 22 L19 15 L28 22 L37 15 L37 38"
+            stroke="#4ade80"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            fill="none"
+          />
+          <circle cx="19" cy="28" r="3.5" fill="rgba(74,222,128,0.85)" />
+          <circle cx="28" cy="24" r="2.5" fill="rgba(74,222,128,0.5)" />
+          <path
+            d="M19 28 L28 24"
+            stroke="#4ade80"
+            stroke-width="1.5"
+            stroke-dasharray="2 2.5"
+            opacity="0.7"
+          />
+          <path
+            d="M13 38 L16 32 L22 34 L25 28 L31 30 L34 38"
+            stroke="rgba(74,222,128,0.25)"
+            stroke-width="1"
+            fill="rgba(74,222,128,0.05)"
+          />
+        </svg>
+        <div class="header-text">
+          <h1>Topical Relevance Plan</h1>
+          <p>
+            Map content gaps, action points &amp; opportunities across your URL
+            portfolio
+          </p>
+        </div>
+        <div class="header-badge">RELEVANCE ENGINE</div>
+      </div>
+
+      <div class="content">
+        <!-- INPUT FORM -->
+        <div class="form-card">
+          <div class="form-col">
+            <div class="form-section" style="margin-bottom: 10">
+              <label for="brand">Brand Name</label>
+              <input
+                type="text"
+                id="brand"
+                placeholder="e.g., Your Brand"
+                required
+              />
+            </div>
+            <div class="form-section" style="margin-bottom: 0">
+              <label for="urlsInput">URLs (comma-separated)</label>
+              <textarea
+                id="urlsInput"
+                placeholder="https://example.com/page-1, https://example.com/page-2, https://competitor.com/article"
+                required
+              ></textarea>
+              <div class="url-pills" id="urlPills"></div>
+            </div>
+          </div>
+
+          <div class="button-group">
+            <button type="button" id="analyzeBtn">
+              <span class="spinner"></span>
+              <span>Run Relevance Plan</span>
+            </button>
+            <button type="button" id="clearBtn">Clear</button>
+          </div>
+
+          <div id="status"></div>
+        </div>
+
+        <!-- RESULTS SECTION -->
+        <div class="analysis-section" id="analysisSection">
+          <div class="section-header">
+            <h2>Analysis Results</h2>
+          </div>
+
+          <!-- Metric cards -->
+          <div class="metrics-grid">
+            <div class="metric-card">
+              <div class="label">Total Rows</div>
+              <div class="value" id="metRows">0</div>
+            </div>
+            <div class="metric-card">
+              <div class="label">Unique URLs</div>
+              <div class="value" id="metUrls">0</div>
+            </div>
+            <div class="metric-card">
+              <div class="label">Unique Platforms</div>
+              <div class="value" id="metPlatforms">0</div>
+            </div>
+            <div class="metric-card">
+              <div class="label">Unique Categories</div>
+              <div class="value" id="metCategories">0</div>
+            </div>
+          </div>
+
+          <!-- Charts -->
+          <div class="charts-section">
+            <div class="chart-container">
+              <h3>Rows by Platform</h3>
+              <canvas id="platformChart"></canvas>
+            </div>
+            <div class="chart-container">
+              <h3>Rows by Category</h3>
+              <canvas id="categoryChart"></canvas>
+            </div>
+            <div class="chart-container">
+              <h3>Source Type Breakdown</h3>
+              <canvas id="sourceChart"></canvas>
+            </div>
+            <div class="chart-container">
+              <h3>URL Type Breakdown</h3>
+              <canvas id="urlTypeChart"></canvas>
+            </div>
+          </div>
+
+          <!-- Filters -->
+          <div class="filter-bar">
+            <span class="filter-label">Filter by:</span>
+            <select class="filter-select" id="filterPlatform">
+              <option value="">All Platforms</option>
+            </select>
+            <select class="filter-select" id="filterCategory">
+              <option value="">All Categories</option>
+            </select>
+            <select class="filter-select" id="filterSourceType">
+              <option value="">All Source Types</option>
+            </select>
+            <select class="filter-select" id="filterUrlType">
+              <option value="">All URL Types</option>
+            </select>
+            <span class="filter-count" id="filterCount"></span>
+          </div>
+
+          <!-- Table -->
+          <div class="table-container">
+            <div class="table-header">
+              <h3>
+                Detailed Results — click Action Point or Gap Opportunity to
+                expand
+              </h3>
+            </div>
+            <div class="table-wrapper">
+              <table class="results-table">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Brand</th>
+                    <th>URL</th>
+                    <th>Title</th>
+                    <th>Description</th>
+                    <th>Action Point</th>
+                    <th>Gap Opportunity</th>
+                    <th>Platform</th>
+                    <th>Source Type</th>
+                    <th>Category</th>
+                    <th>URL Type</th>
+                  </tr>
+                </thead>
+                <tbody id="resultsBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>

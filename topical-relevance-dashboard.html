@@ -1,0 +1,773 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Topical Relevance Plan</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+      :root {
+        --green: #4ade80;
+        --green-dim: #22c55e;
+        --green-glow: rgba(74, 222, 128, 0.15);
+        --green-border: rgba(74, 222, 128, 0.3);
+        --bg: #0d0f0e;
+        --surface: #141714;
+        --surface-2: #1a1d1a;
+        --surface-3: #1f231f;
+        --text: #e8f0e8;
+        --text-muted: #7a907a;
+        --border: rgba(74, 222, 128, 0.12);
+        --danger: #f87171;
+        --warning: #fbbf24;
+        --blue: #60a5fa;
+        --purple: #a78bfa;
+        --teal: #2dd4bf;
+      }
+
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+
+      body {
+        font-family: "DM Sans", sans-serif;
+        background: var(--bg);
+        padding: 2rem;
+        color: var(--text);
+        line-height: 1.6;
+        background-image: radial-gradient(ellipse 60% 40% at 50% 0%, rgba(74, 222, 128, 0.06) 0%, transparent 70%);
+      }
+
+      .container {
+        max-width: 1400px;
+        margin: 0 auto;
+        background: var(--surface);
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        overflow: hidden;
+        box-shadow: 0 0 60px rgba(74, 222, 128, 0.05), 0 4px 24px rgba(0,0,0,0.5);
+      }
+
+      /* HEADER */
+      .header {
+        background: var(--surface-2);
+        border-bottom: 1px solid var(--border);
+        padding: 2rem 2.5rem;
+        display: flex; align-items: center; gap: 1.25rem;
+        position: relative; overflow: hidden;
+      }
+      .header::before {
+        content: "";
+        position: absolute; top: 0; left: 0; right: 0; height: 1px;
+        background: linear-gradient(90deg, transparent, var(--green), transparent);
+      }
+      .header-logo {
+        width: 48px; height: 48px; flex-shrink: 0;
+        filter: drop-shadow(0 0 8px rgba(74, 222, 128, 0.4));
+      }
+      .header-text h1 {
+        font-family: "Space Mono", monospace;
+        font-size: 1.4rem; color: var(--text); font-weight: 700; letter-spacing: -0.02em;
+      }
+      .header-text p { color: var(--text-muted); font-size: 0.85rem; margin-top: 0.15rem; }
+      .header-badge {
+        margin-left: auto;
+        display: flex; align-items: center; gap: 0.5rem;
+        background: var(--green-glow); border: 1px solid var(--green-border);
+        border-radius: 20px; padding: 0.35rem 0.9rem;
+        font-size: 0.75rem; font-family: "Space Mono", monospace;
+        color: var(--green); letter-spacing: 0.05em; white-space: nowrap;
+      }
+      .header-badge::before {
+        content: ""; width: 6px; height: 6px;
+        background: var(--green); border-radius: 50%;
+        box-shadow: 0 0 6px var(--green);
+        animation: pulse 2s ease-in-out infinite;
+      }
+      @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+      /* CONTENT */
+      .content { padding: 2.5rem; }
+
+      .form-card {
+        background: var(--surface-2);
+        border-radius: 10px; border: 1px solid var(--border); padding: 2rem;
+      }
+      .form-row {
+        display: grid; grid-template-columns: 280px 1fr; gap: 1.25rem; margin-bottom: 1.25rem;
+      }
+      .form-section { margin-bottom: 1.25rem; }
+
+      label {
+        display: block; font-weight: 500; margin-bottom: 0.5rem;
+        color: var(--text-muted); font-size: 0.8rem;
+        text-transform: uppercase; letter-spacing: 0.08em;
+        font-family: "Space Mono", monospace;
+      }
+      input, textarea {
+        width: 100%; padding: 0.75rem 1rem;
+        border: 1px solid var(--border); border-radius: 7px;
+        font-size: 0.9rem; background: var(--surface-3); color: var(--text);
+        font-family: "DM Sans", sans-serif;
+        transition: border-color 0.2s, box-shadow 0.2s;
+      }
+      input::placeholder, textarea::placeholder { color: var(--text-muted); }
+      input:focus, textarea:focus {
+        outline: none; border-color: var(--green-border); box-shadow: 0 0 0 3px var(--green-glow);
+      }
+      textarea { resize: vertical; min-height: 96px; }
+
+      .url-pills { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.6rem; }
+      .url-pill {
+        display: inline-flex; align-items: center;
+        background: var(--surface-3); border: 1px solid var(--green-border);
+        border-radius: 4px; padding: 0.18rem 0.55rem;
+        font-size: 0.72rem; color: var(--green); font-family: "Space Mono", monospace;
+        max-width: 500px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      }
+      .url-pill-more { font-size: 0.72rem; color: var(--text-muted); font-family: "Space Mono", monospace; }
+
+      .button-group { display: flex; gap: 0.875rem; margin-top: 1.5rem; }
+      button {
+        flex: 1; background: var(--green); color: #0d0f0e;
+        padding: 0.8rem 1.5rem; border: none; border-radius: 7px; cursor: pointer;
+        font-size: 0.875rem; font-weight: 600; font-family: "Space Mono", monospace;
+        letter-spacing: 0.03em; transition: all 0.2s;
+        display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+      }
+      button:hover:not(:disabled) {
+        background: #86efac; box-shadow: 0 4px 20px rgba(74, 222, 128, 0.35); transform: translateY(-1px);
+      }
+      button:active:not(:disabled) { transform: translateY(0); }
+      button:disabled { opacity: 0.4; cursor: not-allowed; }
+      #clearBtn {
+        background: transparent; color: var(--green); border: 1px solid var(--green-border);
+        flex: 0 0 auto; padding: 0.8rem 1.25rem;
+      }
+      #clearBtn:hover:not(:disabled) { background: var(--green-glow); box-shadow: none; }
+
+      .spinner {
+        width: 14px; height: 14px;
+        border: 2px solid rgba(13,15,14,0.3); border-top-color: #0d0f0e;
+        border-radius: 50%; animation: spin 0.7s linear infinite; display: none; flex-shrink: 0;
+      }
+      @keyframes spin { to { transform: rotate(360deg); } }
+      button.loading .spinner { display: block; }
+
+      #status {
+        margin-top: 1.25rem; padding: 0.875rem 1rem;
+        border-radius: 7px; display: none; font-size: 0.875rem; border-left: 3px solid;
+      }
+      .success  { background: rgba(74,222,128,0.08);  color: #86efac;  border-color: var(--green); }
+      .error    { background: rgba(248,113,113,0.08); color: #fca5a5;  border-color: var(--danger); }
+      .loading  { background: rgba(251,191,36,0.08);  color: #fcd34d;  border-color: var(--warning); }
+      .info     { background: rgba(74,222,128,0.05);  color: var(--text-muted); border-color: var(--border); }
+
+      /* RESULTS */
+      .analysis-section { margin-top: 2rem; display: none; }
+      .section-header {
+        margin-bottom: 1.75rem; padding-bottom: 0.875rem;
+        border-bottom: 1px solid var(--border);
+        display: flex; align-items: center; gap: 0.75rem;
+      }
+      .section-header h2 {
+        color: var(--text); font-size: 1rem; font-weight: 600;
+        font-family: "Space Mono", monospace; letter-spacing: 0.05em;
+      }
+      .section-header h2::before { content: "// "; color: var(--green); }
+
+      .metrics-grid {
+        display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.25rem; margin-bottom: 2rem;
+      }
+      .metric-card {
+        background: var(--surface-2); border: 1px solid var(--border);
+        padding: 1.5rem; border-radius: 10px; text-align: center;
+        position: relative; overflow: hidden;
+        transition: border-color 0.2s, transform 0.2s;
+      }
+      .metric-card:hover { border-color: var(--green-border); transform: translateY(-2px); }
+      .metric-card::before {
+        content: ""; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+        width: 60%; height: 1px;
+        background: linear-gradient(90deg, transparent, var(--green), transparent);
+      }
+      .metric-card .value {
+        font-size: 2.25rem; font-weight: 700; margin: 0.5rem 0;
+        color: var(--green); font-family: "Space Mono", monospace; line-height: 1;
+      }
+      .metric-card .label {
+        color: var(--text-muted); font-size: 0.72rem;
+        text-transform: uppercase; letter-spacing: 0.1em; font-family: "Space Mono", monospace;
+      }
+
+      .charts-section {
+        display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+        gap: 1.25rem; margin-bottom: 2rem;
+      }
+      .chart-container {
+        background: var(--surface-2); padding: 1.5rem;
+        border-radius: 10px; border: 1px solid var(--border);
+        height: 340px; display: flex; flex-direction: column;
+      }
+      .chart-container h3 {
+        color: var(--text-muted); margin-bottom: 1.25rem;
+        font-size: 0.75rem; font-weight: 600;
+        text-transform: uppercase; letter-spacing: 0.1em;
+        font-family: "Space Mono", monospace; flex-shrink: 0;
+      }
+      .chart-container canvas { flex: 1; min-height: 0; }
+
+      /* Filter bar */
+      .filter-bar {
+        display: flex; gap: 0.75rem; margin-bottom: 1rem;
+        flex-wrap: wrap; align-items: center;
+      }
+      .filter-label { font-size: 0.72rem; color: var(--text-muted); font-family: "Space Mono", monospace; white-space: nowrap; }
+      .filter-select {
+        padding: 0.45rem 0.75rem; border: 1px solid var(--border);
+        border-radius: 6px; background: var(--surface-3); color: var(--text);
+        font-size: 0.8rem; font-family: "Space Mono", monospace; cursor: pointer; min-width: 150px;
+      }
+      .filter-select:focus { outline: none; border-color: var(--green-border); }
+      .filter-count { margin-left: auto; font-size: 0.75rem; color: var(--text-muted); font-family: "Space Mono", monospace; }
+
+      /* Table */
+      .table-container {
+        background: var(--surface-2); border-radius: 10px;
+        overflow: hidden; border: 1px solid var(--border);
+      }
+      .table-header {
+        background: var(--surface-3); padding: 1rem 1.5rem;
+        border-bottom: 1px solid var(--border);
+      }
+      .table-header h3 {
+        color: var(--text-muted); font-size: 0.75rem; font-weight: 600;
+        text-transform: uppercase; letter-spacing: 0.1em; font-family: "Space Mono", monospace;
+      }
+      .table-wrapper { overflow-x: auto; }
+      .results-table { width: 100%; border-collapse: collapse; min-width: 1200px; }
+      .results-table th {
+        background: var(--surface-3); color: var(--text-muted);
+        padding: 0.75rem 1rem; text-align: left; font-weight: 600;
+        text-transform: uppercase; letter-spacing: 0.08em;
+        font-size: 0.68rem; font-family: "Space Mono", monospace;
+        white-space: nowrap; border-bottom: 1px solid var(--border);
+      }
+      .results-table td {
+        padding: 0.8rem 1rem; border-bottom: 1px solid var(--border);
+        color: var(--text); font-size: 0.83rem; vertical-align: top;
+      }
+      .results-table tbody tr:hover { background: rgba(74,222,128,0.03); }
+
+      .cell-date   { color: var(--text-muted); font-family: "Space Mono", monospace; font-size: 0.72rem; white-space: nowrap; }
+      .cell-brand  { font-weight: 600; color: var(--green); font-size: 0.8rem; white-space: nowrap; }
+      .cell-url    { font-family: "Space Mono", monospace; font-size: 0.72rem; color: var(--blue); max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .cell-url a  { color: inherit; text-decoration: none; }
+      .cell-url a:hover { text-decoration: underline; }
+      .cell-title  { max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.82rem; }
+      .cell-long   { max-width: 200px; font-size: 0.78rem; line-height: 1.45; }
+      .cell-action { color: #fcd34d; }
+      .cell-gap    { color: #c4b5fd; }
+
+      /* Expandable cells */
+      .expandable { cursor: pointer; }
+      .expandable .short { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 200px; }
+      .expandable .full  { display: none; white-space: normal; max-width: 220px; }
+      .expandable.open .short { display: none; }
+      .expandable.open .full  { display: block; }
+      .expand-hint { font-size: 0.65rem; color: var(--text-muted); font-family: "Space Mono", monospace; margin-top: 0.2rem; }
+
+      /* Badges */
+      .badge {
+        display: inline-flex; align-items: center; justify-content: center;
+        padding: 0.2rem 0.55rem; border-radius: 4px;
+        font-size: 0.7rem; font-weight: 600; font-family: "Space Mono", monospace; white-space: nowrap;
+      }
+      .badge-green  { background: rgba(74,222,128,0.12);  color: var(--green);   border: 1px solid rgba(74,222,128,0.2); }
+      .badge-blue   { background: rgba(96,165,250,0.12);  color: var(--blue);    border: 1px solid rgba(96,165,250,0.2); }
+      .badge-purple { background: rgba(167,139,250,0.12); color: var(--purple);  border: 1px solid rgba(167,139,250,0.2); }
+      .badge-yellow { background: rgba(251,191,36,0.10);  color: #fbbf24;        border: 1px solid rgba(251,191,36,0.2); }
+      .badge-teal   { background: rgba(45,212,191,0.10);  color: var(--teal);    border: 1px solid rgba(45,212,191,0.2); }
+
+      @media (max-width: 900px) {
+        .form-row { grid-template-columns: 1fr; }
+        .charts-section { grid-template-columns: 1fr; }
+      }
+      @media (max-width: 768px) {
+        body { padding: 1rem; }
+        .header { padding: 1.5rem; flex-wrap: wrap; }
+        .header-badge { display: none; }
+        .content { padding: 1.5rem; }
+        .button-group { flex-direction: column; }
+        .metrics-grid { grid-template-columns: 1fr 1fr; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+
+      <!-- HEADER -->
+      <div class="header">
+        <svg class="header-logo" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="48" height="48" rx="10" fill="rgba(74,222,128,0.08)" stroke="rgba(74,222,128,0.25)" stroke-width="1"/>
+          <path d="M10 38 L10 22 L19 15 L28 22 L37 15 L37 38" stroke="#4ade80" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          <circle cx="19" cy="28" r="3.5" fill="rgba(74,222,128,0.85)"/>
+          <circle cx="28" cy="24" r="2.5" fill="rgba(74,222,128,0.5)"/>
+          <path d="M19 28 L28 24" stroke="#4ade80" stroke-width="1.5" stroke-dasharray="2 2.5" opacity="0.7"/>
+          <path d="M13 38 L16 32 L22 34 L25 28 L31 30 L34 38" stroke="rgba(74,222,128,0.25)" stroke-width="1" fill="rgba(74,222,128,0.05)"/>
+        </svg>
+        <div class="header-text">
+          <h1>Topical Relevance Plan</h1>
+          <p>Map content gaps, action points &amp; opportunities across your URL portfolio</p>
+        </div>
+        <div class="header-badge">RELEVANCE ENGINE</div>
+      </div>
+
+      <div class="content">
+
+        <!-- INPUT FORM -->
+        <div class="form-card">
+          <div class="form-col">
+            <div class="form-section" style="margin-bottom:10">
+              <label for="brand">Brand Name</label>
+              <input type="text" id="brand" placeholder="e.g., Your Brand" required />
+            </div>
+            <div class="form-section" style="margin-bottom:0">
+              <label for="urlsInput">URLs (comma-separated)</label>
+              <textarea
+                id="urlsInput"
+                placeholder="https://example.com/page-1, https://example.com/page-2, https://competitor.com/article"
+                required
+              ></textarea>
+              <div class="url-pills" id="urlPills"></div>
+            </div>
+          </div>
+
+          <div class="button-group">
+            <button type="button" id="analyzeBtn">
+              <span class="spinner"></span>
+              <span>Run Relevance Plan</span>
+            </button>
+            <button type="button" id="clearBtn">Clear</button>
+          </div>
+
+          <div id="status"></div>
+        </div>
+
+        <!-- RESULTS SECTION -->
+        <div class="analysis-section" id="analysisSection">
+
+          <div class="section-header">
+            <h2>Analysis Results</h2>
+          </div>
+
+          <!-- Metric cards -->
+          <div class="metrics-grid">
+            <div class="metric-card">
+              <div class="label">Total Rows</div>
+              <div class="value" id="metRows">0</div>
+            </div>
+            <div class="metric-card">
+              <div class="label">Unique URLs</div>
+              <div class="value" id="metUrls">0</div>
+            </div>
+            <div class="metric-card">
+              <div class="label">Unique Platforms</div>
+              <div class="value" id="metPlatforms">0</div>
+            </div>
+            <div class="metric-card">
+              <div class="label">Unique Categories</div>
+              <div class="value" id="metCategories">0</div>
+            </div>
+          </div>
+
+          <!-- Charts -->
+          <div class="charts-section">
+            <div class="chart-container">
+              <h3>Rows by Platform</h3>
+              <canvas id="platformChart"></canvas>
+            </div>
+            <div class="chart-container">
+              <h3>Rows by Category</h3>
+              <canvas id="categoryChart"></canvas>
+            </div>
+            <div class="chart-container">
+              <h3>Source Type Breakdown</h3>
+              <canvas id="sourceChart"></canvas>
+            </div>
+            <div class="chart-container">
+              <h3>URL Type Breakdown</h3>
+              <canvas id="urlTypeChart"></canvas>
+            </div>
+          </div>
+
+          <!-- Filters -->
+          <div class="filter-bar">
+            <span class="filter-label">Filter by:</span>
+            <select class="filter-select" id="filterPlatform"><option value="">All Platforms</option></select>
+            <select class="filter-select" id="filterCategory"><option value="">All Categories</option></select>
+            <select class="filter-select" id="filterSourceType"><option value="">All Source Types</option></select>
+            <select class="filter-select" id="filterUrlType"><option value="">All URL Types</option></select>
+            <span class="filter-count" id="filterCount"></span>
+          </div>
+
+          <!-- Table -->
+          <div class="table-container">
+            <div class="table-header">
+              <h3>Detailed Results — click Action Point or Gap Opportunity to expand</h3>
+            </div>
+            <div class="table-wrapper">
+              <table class="results-table">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Brand</th>
+                    <th>URL</th>
+                    <th>Title</th>
+                    <th>Description</th>
+                    <th>Action Point</th>
+                    <th>Gap Opportunity</th>
+                    <th>Platform</th>
+                    <th>Source Type</th>
+                    <th>Category</th>
+                    <th>URL Type</th>
+                  </tr>
+                </thead>
+                <tbody id="resultsBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // ── CONFIGURE YOUR WEBHOOK ─────────────────────────────────────
+      const WEBHOOK_URL = "https://aeoworkflow.duckdns.org/webhook/833893f0-440a-4dda-8159-592064010a3b";
+      // ──────────────────────────────────────────────────────────────
+
+      let allRows = [];
+      let charts  = {};
+
+      Chart.defaults.color = "#7a907a";
+      Chart.defaults.font.family = "'DM Sans', sans-serif";
+      Chart.defaults.plugins.tooltip.backgroundColor = "#151515";
+      Chart.defaults.plugins.tooltip.borderColor = "#333";
+      Chart.defaults.plugins.tooltip.borderWidth = 1;
+
+      // Live URL pill preview
+      document.getElementById("urlsInput").addEventListener("input", function () {
+        const urls = parseUrls(this.value);
+        const el   = document.getElementById("urlPills");
+        el.innerHTML = "";
+        urls.slice(0, 6).forEach(u => {
+          const p = document.createElement("span");
+          p.className = "url-pill";
+          try { p.textContent = new URL(u).hostname + new URL(u).pathname; } catch { p.textContent = u; }
+          el.appendChild(p);
+        });
+        if (urls.length > 6) {
+          const m = document.createElement("span");
+          m.className = "url-pill-more";
+          m.textContent = ` +${urls.length - 6} more`;
+          el.appendChild(m);
+        }
+      });
+
+      function parseUrls(val) {
+        return val.split(",").map(u => u.trim()).filter(u => u.length > 4);
+      }
+
+      // Clear
+      document.getElementById("clearBtn").addEventListener("click", () => {
+        document.getElementById("brand").value = "";
+        document.getElementById("urlsInput").value = "";
+        document.getElementById("urlPills").innerHTML = "";
+        document.getElementById("status").style.display = "none";
+        document.getElementById("analysisSection").style.display = "none";
+        Object.values(charts).forEach(c => c.destroy());
+        charts = {}; allRows = [];
+      });
+
+      // Submit
+      document.getElementById("analyzeBtn").addEventListener("click", async () => {
+        const btn   = document.getElementById("analyzeBtn");
+        const brand = document.getElementById("brand").value.trim();
+        const urls  = parseUrls(document.getElementById("urlsInput").value);
+
+        if (!brand)          { showStatus("error", "Please enter a Brand Name."); return; }
+        if (!urls.length)    { showStatus("error", "Please enter at least one URL."); return; }
+
+        document.getElementById("analysisSection").style.display = "none";
+        Object.values(charts).forEach(c => c.destroy());
+        charts = {};
+
+        btn.disabled = true;
+        btn.classList.add("loading");
+        showStatus("loading", `Sending ${urls.length} URL${urls.length > 1 ? "s" : ""} to webhook…`);
+
+        try {
+          const res = await fetch(WEBHOOK_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", Accept: "application/json" },
+            mode: "cors",
+            body: JSON.stringify({ Brand: brand, URLs: urls }),
+          });
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const data = await res.json();
+          if (Array.isArray(data) && data.length > 0) {
+            allRows = data;
+            render(allRows);
+            showStatus("success", `Done! ${data.length} row${data.length > 1 ? "s" : ""} returned.`);
+          } else {
+            showStatus("info", "Webhook responded but returned no rows.");
+          }
+        } catch (err) {
+          if (WEBHOOK_URL.includes("YOUR_N8N")) {
+            allRows = mockData(brand, urls);
+            render(allRows);
+            showStatus("info", "⚠ Demo mode — replace WEBHOOK_URL to go live. Showing sample data.");
+          } else {
+            showStatus("error", `Webhook error: ${err.message}`);
+          }
+        } finally {
+          btn.disabled = false;
+          btn.classList.remove("loading");
+        }
+      });
+
+      // Render
+      function render(rows) {
+        buildCharts(rows);
+        populateFilters(rows);
+        applyFilters();
+        document.getElementById("analysisSection").style.display = "block";
+        setTimeout(() => document.getElementById("analysisSection").scrollIntoView({ behavior: "smooth" }), 100);
+      }
+
+      // Filters
+      function populateFilters(rows) {
+        const fill = (id, key) => {
+          const sel = document.getElementById(id);
+          const first = sel.options[0];
+          sel.innerHTML = ""; sel.appendChild(first);
+          [...new Set(rows.map(r => r[key]).filter(Boolean))].sort().forEach(v => {
+            const o = document.createElement("option");
+            o.value = v; o.textContent = v; sel.appendChild(o);
+          });
+          sel.onchange = applyFilters;
+        };
+        fill("filterPlatform",   "Platform Name");
+        fill("filterCategory",   "Category");
+        fill("filterSourceType", "Source Type");
+        fill("filterUrlType",    "URL Type");
+      }
+
+      function applyFilters() {
+        const pf = document.getElementById("filterPlatform").value;
+        const cf = document.getElementById("filterCategory").value;
+        const sf = document.getElementById("filterSourceType").value;
+        const uf = document.getElementById("filterUrlType").value;
+        const filtered = allRows.filter(r =>
+          (!pf || r["Platform Name"] === pf) &&
+          (!cf || r["Category"]      === cf) &&
+          (!sf || r["Source Type"]   === sf) &&
+          (!uf || r["URL Type"]      === uf)
+        );
+        renderTable(filtered);
+        document.getElementById("filterCount").textContent = `Showing ${filtered.length} of ${allRows.length} rows`;
+      }
+
+      // Table
+      function renderTable(rows) {
+        const tbody = document.getElementById("resultsBody");
+        tbody.innerHTML = "";
+
+        rows.forEach(row => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td class="cell-date">${esc(row["Date"] || "")}</td>
+            <td class="cell-brand">${esc(row["Brand"] || "")}</td>
+            <td class="cell-url" title="${esc(row["URL"] || "")}">${
+              row["URL"]
+                ? `<a href="${esc(row["URL"])}" target="_blank" rel="noopener">${shortUrl(row["URL"])}</a>`
+                : "—"
+            }</td>
+            <td class="cell-title" title="${esc(row["Title"] || "")}">${esc(row["Title"] || "—")}</td>
+            <td class="cell-long">${expandCell(row["Description"])}</td>
+            <td class="cell-long cell-action">${expandCell(row["Action Point"])}</td>
+            <td class="cell-long cell-gap">${expandCell(row["Gap Opportunity"])}</td>
+            <td>${badge(row["Platform Name"], "badge-blue")}</td>
+            <td>${badge(row["Source Type"],   "badge-teal")}</td>
+            <td>${badge(row["Category"],      "badge-purple")}</td>
+            <td>${badge(row["URL Type"],      "badge-yellow")}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+
+        // Expand click
+        tbody.querySelectorAll(".expandable").forEach(el => {
+          el.addEventListener("click", () => el.classList.toggle("open"));
+        });
+
+        // Update metric cards
+        document.getElementById("metRows").textContent       = rows.length;
+        document.getElementById("metUrls").textContent       = new Set(rows.map(r => r["URL"])).size;
+        document.getElementById("metPlatforms").textContent  = new Set(rows.map(r => r["Platform Name"]).filter(Boolean)).size;
+        document.getElementById("metCategories").textContent = new Set(rows.map(r => r["Category"]).filter(Boolean)).size;
+      }
+
+      function badge(val, cls) {
+        return val ? `<span class="badge ${cls}">${esc(val)}</span>` : `<span style="color:var(--text-muted)">—</span>`;
+      }
+
+      function expandCell(text) {
+        if (!text) return `<span style="color:var(--text-muted)">—</span>`;
+        const safe = esc(text);
+        if (safe.length <= 55) return `<span>${safe}</span>`;
+        return `<span class="expandable">
+          <span class="short">${safe.slice(0,55)}…</span>
+          <span class="full">${safe}</span>
+          <span class="expand-hint">click to expand</span>
+        </span>`;
+      }
+
+      function shortUrl(url) {
+        try { const u = new URL(url); return (u.hostname + u.pathname).replace(/\/$/, "").slice(0, 38); }
+        catch { return url.slice(0, 38); }
+      }
+
+      function esc(s) {
+        return String(s)
+          .replace(/&/g,"&amp;").replace(/</g,"&lt;")
+          .replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+      }
+
+      // Charts
+      function buildCharts(rows) {
+        const axis = {
+          grid: { color: "rgba(74,222,128,0.06)" },
+          ticks: { color: "#7a907a" },
+        };
+        const palette = [
+          "rgba(74,222,128,0.75)","rgba(96,165,250,0.75)","rgba(167,139,250,0.75)",
+          "rgba(251,191,36,0.75)","rgba(45,212,191,0.75)","rgba(248,113,113,0.75)",
+          "rgba(249,115,22,0.75)","rgba(236,72,153,0.75)","rgba(132,204,22,0.75)",
+        ];
+
+        const countBy = key => {
+          const m = {};
+          rows.forEach(r => { const v = r[key] || "Unknown"; m[v] = (m[v]||0)+1; });
+          return Object.entries(m).sort((a,b) => b[1]-a[1]);
+        };
+
+        const bar = (id, entries) => {
+          if (charts[id]) charts[id].destroy();
+          charts[id] = new Chart(document.getElementById(id), {
+            type: "bar",
+            data: {
+              labels: entries.map(e => e[0]),
+              datasets: [{
+                label: "Rows", data: entries.map(e => e[1]),
+                backgroundColor: entries.map((_,i) => palette[i % palette.length]),
+                borderRadius: 4,
+              }],
+            },
+            options: {
+              indexAxis: "y",
+              responsive: true, maintainAspectRatio: false,
+              plugins: { legend: { display: false } },
+              scales: {
+                x: { ...axis, beginAtZero: true, ticks: { ...axis.ticks, precision: 0 } },
+                y: { ...axis, grid: { display: false } },
+              },
+            },
+          });
+        };
+
+        const doughnut = (id, entries) => {
+          if (charts[id]) charts[id].destroy();
+          charts[id] = new Chart(document.getElementById(id), {
+            type: "doughnut",
+            data: {
+              labels: entries.map(e => e[0]),
+              datasets: [{
+                data: entries.map(e => e[1]),
+                backgroundColor: entries.map((_,i) => palette[i % palette.length]),
+                borderColor: "#141714", borderWidth: 2,
+              }],
+            },
+            options: {
+              responsive: true, maintainAspectRatio: false,
+              plugins: {
+                legend: {
+                  position: "bottom",
+                  labels: { padding: 14, font: { size: 11 }, usePointStyle: true, color: "#7a907a" },
+                },
+              },
+            },
+          });
+        };
+
+        bar("platformChart", countBy("Platform Name").slice(0, 10));
+        bar("categoryChart", countBy("Category").slice(0, 10));
+        doughnut("sourceChart",  countBy("Source Type"));
+        doughnut("urlTypeChart", countBy("URL Type"));
+      }
+
+      function showStatus(type, msg) {
+        const el = document.getElementById("status");
+        el.className = type; el.innerHTML = msg; el.style.display = "block";
+      }
+
+      // Mock data for demo mode
+      function mockData(brand, urls) {
+        const platforms   = ["Google Search", "Reddit", "Quora", "LinkedIn", "YouTube", "Twitter/X", "Medium"];
+        const sourceTypes = ["Organic", "Social", "Forum", "Video", "News", "Podcast"];
+        const categories  = ["Topical Authority", "Content Gap", "Competitor Mention", "FAQ", "How-To", "Listicle", "Case Study"];
+        const urlTypes    = ["Blog Post", "Landing Page", "Product Page", "Forum Thread", "Video", "Pillar Page"];
+        const actions     = [
+          "Create a pillar page targeting this cluster",
+          "Add internal links from supporting articles",
+          "Publish a comparison article to capture mid-funnel traffic",
+          "Expand thin content with an FAQ section",
+          "Build a topic cluster around this keyword group",
+          "Refresh outdated content and update publish date",
+        ];
+        const gaps = [
+          "No content covering this subtopic exists on-site",
+          "Competitor ranks top 3 — clear gap opportunity",
+          "Missing structured data markup on this page type",
+          "No supporting articles currently link to this URL",
+          "Keyword cluster is underserved on this platform",
+          "Search intent mismatch between content and query",
+        ];
+
+        const rows = [];
+        const today = new Date().toISOString().slice(0, 10);
+        urls.forEach(url => {
+          const n = Math.floor(Math.random() * 3) + 1;
+          for (let i = 0; i < n; i++) {
+            rows.push({
+              "Date":            today,
+              "Brand":           brand,
+              "URL":             url,
+              "Title":           `Sample Page Title — ${shortUrl(url)}`,
+              "Description":     "This description summarises the page and its topical relevance. Replace with real data from your n8n workflow.",
+              "Action Point":    actions[Math.floor(Math.random() * actions.length)],
+              "Gap Opportunity": gaps[Math.floor(Math.random() * gaps.length)],
+              "Platform Name":   platforms[Math.floor(Math.random() * platforms.length)],
+              "Source Type":     sourceTypes[Math.floor(Math.random() * sourceTypes.length)],
+              "Category":        categories[Math.floor(Math.random() * categories.length)],
+              "URL Type":        urlTypes[Math.floor(Math.random() * urlTypes.length)],
+            });
+          }
+        });
+        return rows;
+      }
+    </script>
+  </body>
+</html>
