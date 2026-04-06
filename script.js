@@ -1,6 +1,6 @@
 
 // ── CONFIGURE YOUR WEBHOOK ─────────────────────────────────────
-const WEBHOOK_URL = "https://aeoworkflow.duckdns.org/webhook/833893f0-440a-4dda-8159-592064010a3b";
+const WEBHOOK_URL = "https://n8n-smartmarketer.duckdns.org/webhook/833893f0-440a-4dda-8159-592064010a3b";
 // ──────────────────────────────────────────────────────────────
 
 let allRows = [];
